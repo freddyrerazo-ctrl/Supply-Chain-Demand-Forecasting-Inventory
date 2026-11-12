@@ -1,8 +1,8 @@
 # Supply Chain Analytics: Late Deliveries, Profitability, and Demand Forecasting
 
-End-to-end analysis of 180,519 order items from the DataCo supply chain dataset: a normalized SQL Server database, SQL business analysis, a data quality audit, a late-delivery prediction model, and a monthly demand forecast in Python.
+End-to-end analysis of 180,519 order items from the DataCo supply chain dataset: a normalized SQL Server database, SQL business analysis, a data quality audit, a late-delivery prediction model, a monthly demand forecast in Python, and an interactive Power BI dashboard.
 
-**Tools:** SQL Server (T-SQL), Python (pandas, scikit-learn, statsmodels, SciPy, Matplotlib), Jupyter, SQLAlchemy
+**Tools:** SQL Server (T-SQL), Python (pandas, scikit-learn, statsmodels, SciPy, Matplotlib), Jupyter, SQLAlchemy, Power BI
 
 ---
 
@@ -20,7 +20,14 @@ End-to-end analysis of 180,519 order items from the DataCo supply chain dataset:
 - **The business is profitable at every category level.** All 51 categories make money overall (Fishing leads with about \$756K profit); only 3 individual products lose money, led by the SOLE E35 Elliptical.
 - **Customer segments differ in size, not profitability.** Consumers bring in 52% of revenue, Corporate 30%, and Home Office 18%, all at about a 12% margin.
 - **Demand is steady at about \$34,000 a day** (about \$1.04M a month). A simple forecast that adjusts for days in the month (MAPE 4.2%) beat Holt-Winters (6.2%) and SARIMA (4.6%).
+- **Markets take turns over time.** In most months, nearly all sales come from a single market (for example, all LATAM in early 2015 and all Europe in mid-2015), so market comparisons are mixed up with time.
 - **The data changes structure in October 2017.** Orders drop from about 3 items to exactly 1, and far fewer products are sold. Sales fall about 70% by January 2018, but order counts do not, so this is a data change rather than a collapse in demand.
+
+## Dashboard
+
+![Power BI dashboard](PowerBI/dashboard.png)
+
+An interactive Power BI report built on the SQL Server model: KPI cards, monthly net revenue, late delivery rate by shipping mode, top 10 categories by profit, and revenue by customer segment, with filters for year, market, and customer segment. File: [`PowerBI/supply_chain_dashboard.pbix`](PowerBI/supply_chain_dashboard.pbix)
 
 ## Headline numbers
 
@@ -104,6 +111,12 @@ Python connects directly to SQL Server and checks the data before any modeling:
 
 Forecast for October 2017 to March 2018: about \$1.13M per 31-day month, with an approximate 95% range of ±\$117K.
 
+### 5. Power BI dashboard ([`PowerBI`](PowerBI))
+
+- Connected Power BI directly to the `supply_chain` SQL Server database, so it uses the same tables as the SQL and Python work
+- Added a date table and DAX measures: gross and net revenue, profit, profit margin, late rate (excluding canceled orders), and share of loss-making items
+- Dark custom theme with rounded panels, a filter sidebar, and a one-line takeaway under each chart title
+
 ---
 
 ## Recommendations
@@ -116,7 +129,7 @@ Forecast for October 2017 to March 2018: about \$1.13M per 31-day month, with an
 
 ## Limitations
 
-- The dataset appears to be simulated, so some patterns (such as identical top products in every market) are cleaner than real company data.
+- The dataset appears to be simulated, so some patterns (such as identical top products in every market, and markets that take turns month to month) are cleaner than real company data.
 - Profit is supplied by the source without a cost column, so its calculation cannot be verified.
 - The forecast uses only 33 months of history, and the winning method was chosen after seeing results on the same data.
 
@@ -134,6 +147,9 @@ Forecast for October 2017 to March 2018: about \$1.13M per 31-day month, with an
 │   ├── Data_Audit.ipynb      # Notebook 1: data quality audit
 │   ├── Late_Delivery.ipynb   # Notebook 2: late delivery analysis and model
 │   └── demand_forecast.ipynb # Notebook 3: monthly demand forecast
+├── PowerBI/
+│   ├── supply_chain_dashboard.pbix  # Power BI report
+│   └── dashboard.png                # Screenshot of the report
 └── README.md
 ```
 
@@ -144,7 +160,8 @@ Forecast for October 2017 to March 2018: about \$1.13M per 31-day month, with an
 3. **Import the raw files** with SSMS's Import Flat File wizard: no primary keys, and allow nulls on every column.
 4. **Build the tables** by running the scripts in `SQL/Structure Tables/` in order (the 6 core tables first, then `page_views`).
 5. **Run the analysis queries** in `SQL/Analyst/`.
-6. **Run the notebooks** in order. They need the Microsoft ODBC Driver for SQL Server and these packages:
+6. **Open the dashboard** in Power BI Desktop. If it asks for the data source, point it to server `localhost\SQLEXPRESS`, database `supply_chain`, with Windows credentials.
+7. **Run the notebooks** in order. They need the Microsoft ODBC Driver for SQL Server and these packages:
    ```
    pip install pandas sqlalchemy pyodbc scikit-learn statsmodels scipy matplotlib seaborn
    ```
